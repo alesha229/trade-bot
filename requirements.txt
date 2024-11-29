@@ -1,0 +1,7 @@
+python-dotenv==1.0.0
+pybit>=5.0.0
+pandas==2.1.1
+numpy==1.24.3
+ta
+websocket-client==1.6.4
+ccxt==4.1.13
