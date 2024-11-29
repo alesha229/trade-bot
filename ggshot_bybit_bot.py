@@ -31,9 +31,9 @@ class GGShotBot:
         
         # Таймфреймы для каждой пары
         self.timeframes = {
-            "BTCUSDT": ["60", "30" ],  # 1h, 30m, 15m, 5m
-            "ETHUSDT": ["60", "30"],  # 1h, 30m, 15m, 5m
-            "SOLUSDT": ["60"]                    # 1h
+            "BTCUSDT": ["60", "30", "15", "5"],  # 1h, 30m, 15m, 5m
+            "ETHUSDT": ["60", "30", "15", "5"],  # 1h, 30m, 15m, 5m
+            "SOLUSDT": ["60", "30", "15"]        # 1h, 30m, 15m
         }
         
         self.positions = {}
@@ -50,6 +50,141 @@ class GGShotBot:
         
         # Инициализируем time_offset
         self.time_offset = 0
+        
+        # Параметры стратегии GGshot
+        self.strategy_params = {
+            "BTCUSDT": {
+                "3h": {  # BTC/USDT - 3h | Long-Term
+                    "IN1": 4999,
+                    "IN2": 4.5,
+                    "TP1": 0.045,  # 4.5%
+                    "TP2": 0.09,   # 9%
+                    "TP3": 0.14,   # 14%
+                    "TP4": 0.28,   # 28%
+                    "SL": 0.05     # 5%
+                },
+                "1h": {  # BTC/USDT - 1h | Mid-Term
+                    "IN1": 2100,
+                    "IN2": 8,
+                    "TP1": 0.023,  # 2.3%
+                    "TP2": 0.046,  # 4.6%
+                    "TP3": 0.069,  # 6.9%
+                    "TP4": 0.138,  # 13.8%
+                    "SL": 0.023    # 2.3%
+                },
+                "30m": {  # BTC/USDT - 30m | Mid-Term
+                    "IN1": 725,
+                    "IN2": 5,
+                    "TP1": 0.008,  # 0.8%
+                    "TP2": 0.016,  # 1.6%
+                    "TP3": 0.024,  # 2.4%
+                    "TP4": 0.048,  # 4.8%
+                    "SL": 0.008    # 0.8%
+                },
+                "15m": {  # BTC/USDT - 15m | Short-Term
+                    "IN1": 450,
+                    "IN2": 4,
+                    "TP1": 0.005,  # 0.5%
+                    "TP2": 0.01,   # 1.0%
+                    "TP3": 0.015,  # 1.5%
+                    "TP4": 0.03,   # 3.0%
+                    "SL": 0.005    # 0.5%
+                },
+                "5m": {  # BTC/USDT - 5m | Scalp
+                    "IN1": 150,
+                    "IN2": 3,
+                    "TP1": 0.003,  # 0.3%
+                    "TP2": 0.006,  # 0.6%
+                    "TP3": 0.009,  # 0.9%
+                    "TP4": 0.018,  # 1.8%
+                    "SL": 0.003    # 0.3%
+                }
+            },
+            "ETHUSDT": {
+                "3h": {  # ETH/USDT - 3h | Long-Term
+                    "IN1": 4999,
+                    "IN2": 4.5,
+                    "TP1": 0.045,  # 4.5%
+                    "TP2": 0.09,   # 9%
+                    "TP3": 0.14,   # 14%
+                    "TP4": 0.28,   # 28%
+                    "SL": 0.05     # 5%
+                },
+                "1h": {  # ETH/USDT - 1h | Mid-Term
+                    "IN1": 2100,
+                    "IN2": 6.6,
+                    "TP1": 0.023,  # 2.3%
+                    "TP2": 0.046,  # 4.6%
+                    "TP3": 0.069,  # 6.9%
+                    "TP4": 0.138,  # 13.8%
+                    "SL": 0.023    # 2.3%
+                },
+                "30m": {  # ETH/USDT - 30m | Mid-Term
+                    "IN1": 725,
+                    "IN2": 5,
+                    "TP1": 0.008,  # 0.8%
+                    "TP2": 0.016,  # 1.6%
+                    "TP3": 0.024,  # 2.4%
+                    "TP4": 0.048,  # 4.8%
+                    "SL": 0.008    # 0.8%
+                },
+                "15m": {  # ETH/USDT - 15m | Short-Term
+                    "IN1": 450,
+                    "IN2": 4,
+                    "TP1": 0.005,  # 0.5%
+                    "TP2": 0.01,   # 1.0%
+                    "TP3": 0.015,  # 1.5%
+                    "TP4": 0.03,   # 3.0%
+                    "SL": 0.005    # 0.5%
+                },
+                "5m": {  # ETH/USDT - 5m | Scalp
+                    "IN1": 150,
+                    "IN2": 3,
+                    "TP1": 0.003,  # 0.3%
+                    "TP2": 0.006,  # 0.6%
+                    "TP3": 0.009,  # 0.9%
+                    "TP4": 0.018,  # 1.8%
+                    "SL": 0.003    # 0.3%
+                }
+            },
+            "SOLUSDT": {
+                "1h": {  # SOL/USDT - 1h | Mid-Term
+                    "IN1": 2100,
+                    "IN2": 6.6,
+                    "TP1": 0.023,  # 2.3%
+                    "TP2": 0.046,  # 4.6%
+                    "TP3": 0.069,  # 6.9%
+                    "TP4": 0.138,  # 13.8%
+                    "SL": 0.023    # 2.3%
+                },
+                "30m": {  # SOL/USDT - 30m | Mid-Term
+                    "IN1": 725,
+                    "IN2": 5,
+                    "TP1": 0.008,  # 0.8%
+                    "TP2": 0.016,  # 1.6%
+                    "TP3": 0.024,  # 2.4%
+                    "TP4": 0.048,  # 4.8%
+                    "SL": 0.008    # 0.8%
+                },
+                "15m": {  # SOL/USDT - 15m | Short-Term
+                    "IN1": 450,
+                    "IN2": 4,
+                    "TP1": 0.005,  # 0.5%
+                    "TP2": 0.01,   # 1.0%
+                    "TP3": 0.015,  # 1.5%
+                    "TP4": 0.03,   # 3.0%
+                    "SL": 0.005    # 0.5%
+                }
+            }
+        }
+        
+        # Добавляем отслеживание последних цен и позиций
+        self.last_trade_prices = {}  # Хранение последних цен входа
+        self.min_price_change = {    # Минимальное изменение цены для новой позиции
+            "BTCUSDT": 0.02,  # 2% для BTC
+            "ETHUSDT": 0.025, # 2.5% для ETH
+            "SOLUSDT": 0.03   # 3% для SOL
+        }
         
         # Создаем HTTP клиент для получения исторических данных
         self.http_client = HTTP(
@@ -397,6 +532,38 @@ class GGShotBot:
             logging.error(f"Error in should_trade: {e}")
             return False
 
+    def calculate_levels(self, symbol, entry_price, signal):
+        """Рассчитывает уровни TP и SL на основе параметров стратегии"""
+        timeframe = "1h"  # Используем часовой таймфрейм как базовый
+        
+        if symbol not in self.strategy_params or timeframe not in self.strategy_params[symbol]:
+            logging.error(f"No strategy parameters for {symbol} on {timeframe}")
+            return None
+            
+        params = self.strategy_params[symbol][timeframe]
+        
+        # Рассчитываем все уровни TP и SL
+        if signal == "long":
+            levels = {
+                "entry_price": entry_price,
+                "take_profit1": entry_price * (1 + params["TP1"]),  # TP1 2.3%
+                "take_profit2": entry_price * (1 + params["TP2"]),  # TP2 4.6%
+                "take_profit3": entry_price * (1 + params["TP3"]),  # TP3 6.9%
+                "take_profit4": entry_price * (1 + params["TP4"]),  # TP4 13.8%
+                "stop_loss": entry_price * (1 - params["SL"])       # SL 2.3%
+            }
+        else:  # short
+            levels = {
+                "entry_price": entry_price,
+                "take_profit1": entry_price * (1 - params["TP1"]),  # TP1 2.3%
+                "take_profit2": entry_price * (1 - params["TP2"]),  # TP2 4.6%
+                "take_profit3": entry_price * (1 - params["TP3"]),  # TP3 6.9%
+                "take_profit4": entry_price * (1 - params["TP4"]),  # TP4 13.8%
+                "stop_loss": entry_price * (1 + params["SL"])       # SL 2.3%
+            }
+        
+        return levels
+
     def get_balance(self):
         """Получает и выводит текущий баланс аккаунта"""
         try:
@@ -563,6 +730,101 @@ class GGShotBot:
         except Exception as e:
             logging.error(f"Error enabling hedge mode: {e}")
 
+    def place_tp_orders(self, symbol, signal, entry_price, position_idx):
+        """Размещает ордера Take Profit для позиции"""
+        try:
+            # Получаем уровни
+            levels = self.calculate_levels(symbol, entry_price, signal)
+            if not levels:
+                return False
+
+            # Рассчитываем размер позиции
+            position_size = self.calculate_position_size(symbol, entry_price)
+            if not position_size:
+                return False
+
+            # Распределяем размер позиции по TP уровням
+            tp_sizes = {
+                "tp1": int(position_size * 0.4),  # 40% на первом TP
+                "tp2": int(position_size * 0.3),  # 30% на втором TP
+                "tp3": int(position_size * 0.2),  # 20% на третьем TP
+                "tp4": int(position_size * 0.1)   # 10% на четвертом TP
+            }
+            
+            tp_prices = {
+                "tp1": round(levels["take_profit1"], 2),
+                "tp2": round(levels["take_profit2"], 2),
+                "tp3": round(levels["take_profit3"], 2),
+                "tp4": round(levels["take_profit4"], 2)
+            }
+
+            # Устанавливаем Stop Loss
+            sl_order = self.http_client.set_trading_stop(
+                category="linear",
+                symbol=symbol,
+                stopLoss=str(round(levels["stop_loss"], 2)),
+                positionIdx=position_idx,
+                slTriggerBy="MarkPrice"
+            )
+            
+            if sl_order["retCode"] == 0:
+                logging.info(f"✅ Stop Loss set at {round(levels['stop_loss'], 2)}")
+            else:
+                logging.error(f"❌ Failed to set Stop Loss: {sl_order}")
+                return False
+
+            # Устанавливаем все Take Profit ордера с частичным закрытием
+            for i, (tp_level, tp_size) in enumerate([("tp1", tp_sizes["tp1"]), 
+                                                   ("tp2", tp_sizes["tp2"]), 
+                                                   ("tp3", tp_sizes["tp3"]), 
+                                                   ("tp4", tp_sizes["tp4"])], 1):
+                if tp_size < 1:
+                    continue
+
+                tp_order = self.http_client.set_trading_stop(
+                    category="linear",
+                    symbol=symbol,
+                    takeProfit=str(tp_prices[tp_level]),
+                    tpSize=str(tp_size),
+                    positionIdx=position_idx,
+                    tpTriggerBy="MarkPrice",
+                    tpslMode="Partial"  # Режим частичного закрытия для всех TP
+                )
+                
+                if tp_order["retCode"] == 0:
+                    logging.info(f"✅ Take Profit {i} set at {tp_prices[tp_level]} with size {tp_size}")
+                else:
+                    logging.error(f"❌ Failed to set Take Profit {i}: {tp_order}")
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error placing TP orders: {e}")
+            return False
+
+    def check_significant_price_change(self, symbol, current_price):
+        """Проверяет, было ли значительное изменение цены с момента последней сделки"""
+        try:
+            if symbol not in self.last_trade_prices:
+                return True  # Если это первая сделка для пары
+
+            last_price = self.last_trade_prices[symbol]
+            min_change = self.min_price_change.get(symbol, 0.02)  # По умолчанию 2%
+            
+            # Вычисляем процентное изменение
+            price_change = abs(current_price - last_price) / last_price
+            
+            if price_change >= min_change:
+                logging.info(f"✅ Significant price change detected for {symbol}: {price_change:.2%}")
+                return True
+            else:
+                logging.info(f"🚫 Price change insufficient for {symbol}: {price_change:.2%} < {min_change:.2%}")
+                return False
+                
+        except Exception as e:
+            logging.error(f"Error checking price change: {e}")
+            return False
+
     def execute_trade(self, symbol):
         """Исполняет торговый сигнал"""
         try:
@@ -582,38 +844,46 @@ class GGShotBot:
                 
             position_data = self.positions[symbol]
             signal = position_data["signal"]
-            levels = position_data["levels"]
             
-            # Округляем цены до 2 знаков после запятой для USDT пар
-            entry_price = round(levels['entry_price'], 2)
+            # Получаем текущую цену
+            ticker = self.http_client.get_tickers(
+                category="linear",
+                symbol=symbol
+            )
             
-            # Для длинной позиции: SL ниже входа, TP выше входа
-            # Для короткой позиции: SL выше входа, TP ниже входа
-            if signal == "long":
-                stop_loss = round(min(levels['stop_loss'], entry_price), 2)
-                take_profit = round(max(levels['take_profit'], entry_price), 2)
-                position_idx = 1  # Для лонга в режиме хеджирования
-            else:
-                stop_loss = round(max(levels['stop_loss'], entry_price), 2)
-                take_profit = round(min(levels['take_profit'], entry_price), 2)
-                position_idx = 2  # Для шорта в режиме хеджирования
+            if ticker["retCode"] != 0:
+                logging.error(f"Failed to get ticker: {ticker}")
+                return
+                
+            current_price = float(ticker["result"]["list"][0]["lastPrice"])
             
-            # Рассчитываем размер позиции в целых контрактах
-            quantity = self.calculate_position_size(symbol, entry_price)
-            if not quantity:
-                logging.error("Failed to calculate position size")
+            # Проверяем, было ли значительное изменение цены
+            if not self.check_significant_price_change(symbol, current_price):
+                logging.warning(f"🚫 Skipping trade for {symbol} - insufficient price change")
                 return
             
-            current_timestamp = self.get_current_timestamp()
+            # Рассчитываем размер позиции
+            position_size = self.calculate_position_size(symbol, current_price)
+            if not position_size:
+                logging.error("Failed to calculate position size")
+                return
                 
+            # Проверяем достаточно ли средств
+            wallet_balance = float(self.get_balance())
+            required_margin = current_price * position_size * 0.01  # 1% маржи
+            
+            if required_margin > wallet_balance:
+                logging.error(f"❌ Not enough balance. Required: {required_margin} USDT, Available: {wallet_balance} USDT")
+                return
+
+            # Для длинной позиции используем индекс 1, для короткой 2
+            position_idx = 1 if signal == "long" else 2
+            
             try:
                 logging.info(f"\n{'='*50}")
                 logging.info(f"🚀 Executing {signal.upper()} trade for {symbol}")
-                logging.info(f"Position size: {quantity} contracts")
-                logging.info(f"Entry: {entry_price}")
-                logging.info(f"Stop Loss: {stop_loss}")
-                logging.info(f"Take Profit: {take_profit}")
-                logging.info(f"Position Index: {position_idx}")
+                logging.info(f"Position size: {position_size} contracts")
+                logging.info(f"Entry price: {current_price}")
                 
                 # Основной ордер
                 main_order = self.http_client.place_order(
@@ -621,49 +891,33 @@ class GGShotBot:
                     symbol=symbol,
                     side="Buy" if signal == "long" else "Sell",
                     orderType="Market",
-                    qty=str(quantity),
-                    timestamp=current_timestamp,
-                    positionIdx=position_idx,  # Добавляем индекс позиции
-                    reduceOnly=False,  # Не закрывающий ордер
-                    closeOnTrigger=False  # Не закрывающий ордер
+                    qty=str(position_size),
+                    positionIdx=position_idx,
+                    reduceOnly=False,
+                    closeOnTrigger=False
                 )
                 
-                if main_order['retCode'] != 0:
+                if main_order["retCode"] != 0:
                     logging.error(f"❌ Failed to place main order: {main_order}")
                     return
                     
-                logging.info(f"✅ Main order placed successfully")
+                logging.info("✅ Main order placed successfully")
+                
+                # Обновляем последнюю цену входа
+                self.last_trade_prices[symbol] = current_price
                 
                 # Ждем небольшую паузу для обработки основного ордера
                 time.sleep(1)
                 
-                # Обновляем timestamp
-                current_timestamp = self.get_current_timestamp()
-                
-                # Устанавливаем TP/SL для открытой позиции
-                tp_sl_order = self.http_client.set_trading_stop(
-                    category="linear",
-                    symbol=symbol,
-                    stopLoss=str(stop_loss),
-                    takeProfit=str(take_profit),
-                    positionIdx=position_idx,  # Добавляем тот же индекс позиции
-                    timestamp=current_timestamp,
-                    tpTriggerBy="MarkPrice",
-                    slTriggerBy="MarkPrice"
-                )
-                
-                if tp_sl_order['retCode'] == 0:
-                    logging.info(f"✅ TP/SL levels set successfully")
+                # Размещаем Take Profit ордера
+                if self.place_tp_orders(symbol, signal, current_price, position_idx):
+                    logging.info(f"✅ All Take Profit orders placed successfully")
                 else:
-                    logging.error(f"❌ Failed to set TP/SL levels: {tp_sl_order}")
+                    logging.error(f"❌ Failed to place some Take Profit orders")
                     
             except Exception as e:
                 logging.error(f"Error placing orders: {e}")
                 
-            finally:
-                # Очищаем данные позиции
-                del self.positions[symbol]
-            
         except Exception as e:
             logging.error(f"Error executing trade: {e}")
 

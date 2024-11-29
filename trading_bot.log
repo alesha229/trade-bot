@@ -10235,3 +10235,55 @@ Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linea
 2024-11-29 17:36:26,119 - WARNING - 🚫 Margin usage too high (22.16%). Skip opening new position
 2024-11-29 17:36:27,699 - WARNING - 🚫 Margin usage too high (22.16%). Skip opening new position
 2024-11-29 17:36:28,219 - WARNING - 🚫 Margin usage too high (22.16%). Skip opening new position
+2024-11-29 17:46:49,293 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 17:47:15,394 - ERROR - No strategy parameters for SOLUSDT on 1h
+2024-11-29 17:47:25,600 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 14:47:25).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "timestamp": 1732891644581, "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 17:47:28,279 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 14:47:28).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "timestamp": 1732891646876, "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 17:47:33,987 - WARNING - 🚫 Margin usage too high (21.62%). Skip opening new position
+2024-11-29 17:47:35,065 - WARNING - 🚫 Margin usage too high (21.62%). Skip opening new position
+2024-11-29 17:51:07,597 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 17:51:33,861 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 14:51:33).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "timestamp": 1732891892706, "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 17:51:35,518 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 14:51:35).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "timestamp": 1732891894743, "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 17:51:36,718 - ERROR - No strategy parameters for SOLUSDT on 1h
+2024-11-29 17:51:41,631 - ERROR - Error placing TP orders: timeInForce invalid (ErrCode: 10001) (ErrTime: 14:51:41).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "ETHUSDT", "side": "Sell", "orderType": "Limit", "qty": "40", "price": "3708.6512099999995", "positionIdx": 1, "reduceOnly": true, "closeOnTrigger": true, "timeInForce": "GoodTillCancel"}.
+2024-11-29 17:51:41,632 - ERROR - ❌ Failed to place some Take Profit orders
+2024-11-29 17:51:45,817 - ERROR - Error placing TP orders: timeInForce invalid (ErrCode: 10001) (ErrTime: 14:51:45).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "ETHUSDT", "side": "Sell", "orderType": "Limit", "qty": "40", "price": "3707.99649", "positionIdx": 1, "reduceOnly": true, "closeOnTrigger": true, "timeInForce": "GoodTillCancel"}.
+2024-11-29 17:51:45,818 - ERROR - ❌ Failed to place some Take Profit orders
+2024-11-29 17:51:51,246 - ERROR - Error placing TP orders: timeInForce invalid (ErrCode: 10001) (ErrTime: 14:51:51).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "ETHUSDT", "side": "Sell", "orderType": "Limit", "qty": "40", "price": "3708.4977599999997", "positionIdx": 1, "reduceOnly": true, "closeOnTrigger": true, "timeInForce": "GoodTillCancel"}.
+2024-11-29 17:51:51,247 - ERROR - ❌ Failed to place some Take Profit orders
+2024-11-29 17:51:52,146 - WARNING - 🚫 Margin usage too high (21.67%). Skip opening new position
+2024-11-29 17:51:53,050 - WARNING - 🚫 Margin usage too high (21.67%). Skip opening new position
+2024-11-29 17:53:09,754 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 17:53:36,461 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 14:53:36).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "timestamp": 1732892015679, "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 17:53:38,110 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 14:53:38).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "timestamp": 1732892017331, "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 17:53:48,635 - WARNING - 🚫 Margin usage too high (21.70%). Skip opening new position
+2024-11-29 17:53:50,472 - WARNING - 🚫 Margin usage too high (21.70%). Skip opening new position
+2024-11-29 17:53:51,080 - WARNING - 🚫 Margin usage too high (21.70%). Skip opening new position
+2024-11-29 17:55:05,211 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'position_switch_mode'
+2024-11-29 17:55:27,892 - ERROR - Error calculating position size: 'str' object has no attribute 'get'
+2024-11-29 17:55:27,892 - ERROR - Failed to calculate position size
+2024-11-29 17:55:41,504 - ERROR - Error calculating position size: 'str' object has no attribute 'get'
+2024-11-29 17:55:41,504 - ERROR - Failed to calculate position size
+2024-11-29 17:55:44,505 - ERROR - Error calculating position size: 'str' object has no attribute 'get'
+2024-11-29 17:55:44,505 - ERROR - Failed to calculate position size
+2024-11-29 18:00:08,994 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 18:00:27,148 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 15:00:27).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 18:02:33,262 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 18:03:11,917 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 15:03:11).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 18:05:36,837 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 18:06:09,856 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 15:06:09).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
+2024-11-29 18:08:54,151 - ERROR - Error enabling hedge mode: 'HTTP' object has no attribute 'set_position_mode'
+2024-11-29 18:09:18,924 - ERROR - Error placing orders: ab not enough for new order (ErrCode: 110007) (ErrTime: 15:09:18).
+Request → POST https://api-demo.bybit.com/v5/order/create: {"category": "linear", "symbol": "BTCUSDT", "side": "Buy", "orderType": "Market", "qty": "100", "positionIdx": 1, "reduceOnly": false, "closeOnTrigger": false}.
