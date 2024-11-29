@@ -9,9 +9,10 @@ import ta
 import threading
 import queue
 from pybit.unified_trading import WebSocket
+
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('trading_bot.log', encoding='utf-8'),
@@ -30,8 +31,8 @@ class GGShotBot:
         
         # Таймфреймы для каждой пары
         self.timeframes = {
-            "BTCUSDT": ["60", "30", "15", "5"],  # 1h, 30m, 15m, 5m
-            "ETHUSDT": ["60", "30", "15", "5"],  # 1h, 30m, 15m, 5m
+            "BTCUSDT": ["60", "30" ],  # 1h, 30m, 15m, 5m
+            "ETHUSDT": ["60", "30"],  # 1h, 30m, 15m, 5m
             "SOLUSDT": ["60"]                    # 1h
         }
         
@@ -55,7 +56,8 @@ class GGShotBot:
             testnet=self.config.get('test_mode', True),
             api_key=self.config['api_key'],
             api_secret=self.config['api_secret'],
-            recv_window=20000  # Используем стандартное значение
+            recv_window=20000,  # Используем стандартное значение
+            demo=True  # Добавляем параметр для демо-ключей
         )
         
         # Синхронизируем время с сервером
@@ -64,6 +66,9 @@ class GGShotBot:
         
         # Получаем и выводим текущий баланс
         self.get_balance()
+        
+        # Включаем режим хеджирования при инициализации
+        self._enable_hedge_mode()
         
         # Получаем исторические данные перед запуском WebSocket
         self.load_historical_data()
@@ -77,14 +82,13 @@ class GGShotBot:
         """Загружает исторические данные для всех торговых пар и таймфреймов"""
         for symbol in self.trading_pairs:
             for timeframe in self.timeframes[symbol]:
-                logging.info(f"Loading historical data for {symbol} on {timeframe}m timeframe")
                 try:
                     # Получаем текущее время с учетом смещения
                     current_timestamp = self.get_current_timestamp()
                     
-                    # Получаем исторические данные
+                    # Получаем исторические данные для фьючерсов
                     response = self.http_client.get_kline(
-                        category="spot",
+                        category="linear",  # Используем linear для фьючерсов
                         symbol=symbol,
                         interval=timeframe,
                         limit=self.max_candles,
@@ -105,7 +109,7 @@ class GGShotBot:
                             df[col] = pd.to_numeric(df[col], errors='coerce')
                         
                         self.historical_data[symbol][timeframe] = df
-                        logging.info(f"Loaded {len(df)} historical candles for {symbol} {timeframe}m from {df['timestamp'].iloc[0]}")
+                        logging.info(f"Loaded {len(df)} historical candles for {symbol} {timeframe}m")
                     else:
                         logging.error(f"Error in response for {symbol} {timeframe}m: {response}")
                         
@@ -117,7 +121,7 @@ class GGShotBot:
         # Публичный WebSocket для получения рыночных данных
         self.ws_public = WebSocket(
             testnet=self.config.get('test_mode', True),
-            channel_type="spot"
+            channel_type="linear"  # Используем linear для фьючерсов
         )
         
         # Приватный WebSocket для получения данных аккаунта
@@ -452,14 +456,16 @@ class GGShotBot:
     def calculate_position_size(self, symbol, entry_price):
         """Рассчитывает размер позиции на основе баланса"""
         try:
-            # Добавляем смещение времени к текущему времени
+            # Для тестнета используем фиксированный маленький размер
+            if self.config.get('test_mode', True):
+                return 1  # Минимум 1 контракт для тестнета
+                
             current_timestamp = self.get_current_timestamp()
             
-            # Получаем баланс USDT с синхронизированным временем
+            # Получаем баланс USDT
             balance_response = self.http_client.get_wallet_balance(
                 accountType="UNIFIED",
                 coin="USDT",
-                recv_window=60000,  # Увеличиваем окно приема до 60 секунд
                 timestamp=current_timestamp
             )
             
@@ -468,25 +474,108 @@ class GGShotBot:
                 return None
                 
             available_balance = float(balance_response['result']['list'][0]['coin'][0]['walletBalance'])
+            position_value = available_balance * 0.02  # 2% от баланса
             
-            # Используем 2% от баланса для каждой сделки
-            position_value = available_balance * 0.02
+            # Конвертируем в количество контрактов (целое число)
+            quantity = int(position_value)
             
-            # Рассчитываем количество монет
-            quantity = position_value / entry_price
-            
-            # Округляем до 6 знаков после запятой
-            quantity = round(quantity, 6)
-            
-            return quantity
+            # Минимальный размер 1 контракт, максимальный 100
+            return max(1, min(100, quantity))
             
         except Exception as e:
             logging.error(f"Error calculating position size: {e}")
             return None
 
+    def check_margin_ratio(self):
+        """Проверяет процент используемой маржи на основе открытых позиций"""
+        try:
+            current_timestamp = self.get_current_timestamp()
+            
+            # Получаем баланс
+            account_info = self.http_client.get_wallet_balance(
+                accountType="UNIFIED",
+                coin="USDT",
+                timestamp=current_timestamp
+            )
+            
+            if account_info['retCode'] != 0:
+                logging.error(f"Failed to get account info: {account_info}")
+                return None
+                
+            # Получаем общий баланс
+            total_equity = float(account_info['result']['list'][0]['totalEquity'])
+            
+            # Получаем все открытые позиции
+            positions = self.http_client.get_positions(
+                category="linear",
+                settleCoin="USDT",
+                timestamp=current_timestamp
+            )
+            
+            if positions['retCode'] != 0:
+                logging.error(f"Failed to get positions: {positions}")
+                return None
+                
+            total_margin_used = 0
+            
+            # Считаем использованную маржу по всем позициям
+            for position in positions['result']['list']:
+                if float(position['size']) > 0:  # Если позиция открыта
+                    position_size = float(position['size'])
+                    mark_price = float(position['markPrice'])
+                    leverage = float(position['leverage'])
+                    
+                    # Маржа = Размер позиции * Цена / Кредитное плечо
+                    position_margin = (position_size * mark_price) / leverage
+                    total_margin_used += position_margin
+            
+            # Рассчитываем процент использованной маржи
+            margin_ratio = (total_margin_used / total_equity * 100) if total_equity > 0 else 0
+            
+            logging.info(f"💰 Account balance: {total_equity:.2f} USDT")
+            logging.info(f"📊 Total margin used: {total_margin_used:.2f} USDT")
+            logging.info(f"📈 Current margin usage: {margin_ratio:.2f}%")
+            
+            return margin_ratio
+            
+        except Exception as e:
+            logging.error(f"Error checking margin ratio: {e}")
+            return None
+
+    def _enable_hedge_mode(self):
+        """Включает режим хеджирования"""
+        try:
+            current_timestamp = self.get_current_timestamp()
+            
+            # В V5 API используем set_position_mode для проверки и установки режима
+            result = self.http_client.set_position_mode(
+                category="linear",
+                symbol="*",  # для всех символов
+                mode="BothSide",  # BothSide для хеджирования
+                timestamp=current_timestamp
+            )
+            
+            if result['retCode'] == 0:
+                logging.info("✅ Hedge mode enabled successfully")
+            else:
+                logging.error(f"Failed to enable hedge mode: {result}")
+            
+        except Exception as e:
+            logging.error(f"Error enabling hedge mode: {e}")
+
     def execute_trade(self, symbol):
         """Исполняет торговый сигнал"""
         try:
+            # Проверяем использованную маржу
+            margin_ratio = self.check_margin_ratio()
+            if margin_ratio is None:
+                logging.error("Failed to check margin ratio")
+                return
+                
+            if margin_ratio > 20:
+                logging.warning(f"🚫 Margin usage too high ({margin_ratio:.2f}%). Skip opening new position")
+                return
+                
             if symbol not in self.positions:
                 logging.error(f"No position data for {symbol}")
                 return
@@ -495,29 +584,48 @@ class GGShotBot:
             signal = position_data["signal"]
             levels = position_data["levels"]
             
-            # Рассчитываем размер позиции
-            quantity = self.calculate_position_size(symbol, levels['entry_price'])
+            # Округляем цены до 2 знаков после запятой для USDT пар
+            entry_price = round(levels['entry_price'], 2)
+            
+            # Для длинной позиции: SL ниже входа, TP выше входа
+            # Для короткой позиции: SL выше входа, TP ниже входа
+            if signal == "long":
+                stop_loss = round(min(levels['stop_loss'], entry_price), 2)
+                take_profit = round(max(levels['take_profit'], entry_price), 2)
+                position_idx = 1  # Для лонга в режиме хеджирования
+            else:
+                stop_loss = round(max(levels['stop_loss'], entry_price), 2)
+                take_profit = round(min(levels['take_profit'], entry_price), 2)
+                position_idx = 2  # Для шорта в режиме хеджирования
+            
+            # Рассчитываем размер позиции в целых контрактах
+            quantity = self.calculate_position_size(symbol, entry_price)
             if not quantity:
                 logging.error("Failed to calculate position size")
                 return
-                
-            # Получаем текущее время с учетом смещения
+            
             current_timestamp = self.get_current_timestamp()
                 
-            # Создаем основной ордер
             try:
                 logging.info(f"\n{'='*50}")
-                logging.info(f"🚀 Executing trade for {symbol}")
+                logging.info(f"🚀 Executing {signal.upper()} trade for {symbol}")
+                logging.info(f"Position size: {quantity} contracts")
+                logging.info(f"Entry: {entry_price}")
+                logging.info(f"Stop Loss: {stop_loss}")
+                logging.info(f"Take Profit: {take_profit}")
+                logging.info(f"Position Index: {position_idx}")
                 
+                # Основной ордер
                 main_order = self.http_client.place_order(
-                    category="spot",
+                    category="linear",
                     symbol=symbol,
                     side="Buy" if signal == "long" else "Sell",
                     orderType="Market",
                     qty=str(quantity),
-                    isLeverage=0,
-                    orderFilter="Order",
-                    timestamp=current_timestamp
+                    timestamp=current_timestamp,
+                    positionIdx=position_idx,  # Добавляем индекс позиции
+                    reduceOnly=False,  # Не закрывающий ордер
+                    closeOnTrigger=False  # Не закрывающий ордер
                 )
                 
                 if main_order['retCode'] != 0:
@@ -526,60 +634,29 @@ class GGShotBot:
                     
                 logging.info(f"✅ Main order placed successfully")
                 
-                # Обновляем timestamp для следующего запроса
+                # Ждем небольшую паузу для обработки основного ордера
+                time.sleep(1)
+                
+                # Обновляем timestamp
                 current_timestamp = self.get_current_timestamp()
                 
-                # Создаем ордер стоп-лосс
-                sl_order = self.http_client.place_order(
-                    category="spot",
+                # Устанавливаем TP/SL для открытой позиции
+                tp_sl_order = self.http_client.set_trading_stop(
+                    category="linear",
                     symbol=symbol,
-                    side="Sell" if signal == "long" else "Buy",
-                    orderType="StopLimit",
-                    qty=str(quantity),
-                    price=str(levels['stop_loss']),
-                    stopPrice=str(levels['stop_loss']),
-                    isLeverage=0,
-                    orderFilter="StopOrder",
-                    triggerDirection=2 if signal == "long" else 1,
-                    timestamp=current_timestamp
+                    stopLoss=str(stop_loss),
+                    takeProfit=str(take_profit),
+                    positionIdx=position_idx,  # Добавляем тот же индекс позиции
+                    timestamp=current_timestamp,
+                    tpTriggerBy="MarkPrice",
+                    slTriggerBy="MarkPrice"
                 )
                 
-                if sl_order['retCode'] == 0:
-                    logging.info(f"✅ Stop Loss order placed")
+                if tp_sl_order['retCode'] == 0:
+                    logging.info(f"✅ TP/SL levels set successfully")
                 else:
-                    logging.error(f"❌ Failed to place stop loss order: {sl_order}")
-                
-                # Обновляем timestamp для следующего запроса
-                current_timestamp = self.get_current_timestamp()
-                
-                # Создаем ордер тейк-профит
-                tp_order = self.http_client.place_order(
-                    category="spot",
-                    symbol=symbol,
-                    side="Sell" if signal == "long" else "Buy",
-                    orderType="Limit",
-                    qty=str(quantity),
-                    price=str(levels['take_profit']),
-                    isLeverage=0,
-                    orderFilter="Order",
-                    timeInForce="GoodTillCancel",
-                    timestamp=current_timestamp
-                )
-                
-                if tp_order['retCode'] == 0:
-                    logging.info(f"✅ Take Profit order placed")
-                else:
-                    logging.error(f"❌ Failed to place take profit order: {tp_order}")
-                
-                logging.info(f"\n📊 Trade Summary:")
-                logging.info(f"Symbol: {symbol}")
-                logging.info(f"Direction: {'🟢 LONG' if signal == 'long' else '🔴 SHORT'}")
-                logging.info(f"Quantity: {quantity}")
-                logging.info(f"Entry: {levels['entry_price']:.2f}")
-                logging.info(f"Stop Loss: {levels['stop_loss']:.2f}")
-                logging.info(f"Take Profit: {levels['take_profit']:.2f}")
-                logging.info(f"{'='*50}\n")
-                
+                    logging.error(f"❌ Failed to set TP/SL levels: {tp_sl_order}")
+                    
             except Exception as e:
                 logging.error(f"Error placing orders: {e}")
                 
